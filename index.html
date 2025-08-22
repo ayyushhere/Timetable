@@ -1,161 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dark Mode Timetable</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ayu • Daily Timetable + Hair Care (Dark)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* Brand palette */
+      --teal:#A8DADC; --foam:#F1FAEE; --peach:#FFDDD2; --salmon:#E29578;
+      /* Dark theme */
+      --bg:#0b0f14; --panel:#111720; --muted:#9aa6b2; --text:#e6edf3; --grid:#202a36;
+      --accent: var(--teal);
+      --radius:18px; --radius-sm:12px; --shadow:0 10px 30px rgba(0,0,0,.45);
+      --ease:cubic-bezier(.2,.8,.2,1); --speed:700ms;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Poppins,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--text); background:
+        radial-gradient(1100px 700px at 85% -10%, rgba(168,218,220,.14), transparent 60%),
+        radial-gradient(900px 600px at 10% 110%, rgba(226,149,120,.12), transparent 60%),
+        var(--bg);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 64px}
+
+    header.hero{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+    h1{margin:0;font-size:clamp(22px,2.6vw,36px);font-weight:700;letter-spacing:.3px;background:linear-gradient(90deg,var(--teal),var(--salmon));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 10px rgba(168,218,220,.08))}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--muted)}
+
+    /* Nav Tabs */
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 18px}
+    .tab{cursor:pointer;padding:10px 14px;border-radius:999px;border:1px solid color-mix(in oklab,var(--accent) 40%,transparent);background:rgba(255,255,255,.02);color:var(--text);transition:.3s var(--ease);font-weight:600}
+    .tab:hover{transform:translateY(-2px)}
+    .tab.active{background:linear-gradient(90deg,rgba(168,218,220,.2),rgba(226,149,120,.18));box-shadow:0 6px 22px rgba(168,218,220,.18)}
+
+    /* Pages */
+    .pages{position:relative}
+    .page{display:none;animation:fadeIn .5s var(--ease) both}
+    .page.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    /* Cards */
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.00)) padding-box,linear-gradient(135deg, rgba(168,218,220,.28), rgba(226,149,120,.28)) border-box;border:1px solid transparent;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card h2{margin:0;padding:16px 18px;font-size:18px;border-bottom:1px solid var(--grid);color:var(--foam)}
+    .card .content{padding:16px}
+
+    /* Morning Blocks (shared schedule) */
+    .timeline{display:grid;grid-template-columns:140px auto;gap:10px}
+    .time{color:var(--muted);font-weight:600}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--grid);border-radius:var(--radius-sm);background:rgba(255,255,255,.02);transition:.35s var(--ease)}
+    .row:hover{transform:translateY(-2px);background:rgba(255,255,255,.04)}
+    .row .label{display:flex;align-items:center;gap:10px}
+    .pill{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.08);color:var(--muted)}
+
+    /* Day schedule grid */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .block{grid-column:span 6;background:rgba(255,255,255,.03);border:1px solid var(--grid);border-radius:14px;padding:12px;transition:.35s var(--ease);position:relative;overflow:hidden}
+    .block:hover{transform:translateY(-3px)}
+    .t{font-size:12px;color:var(--muted);display:block}
+    .b{font-weight:600}
+    .tag{margin-top:6px;display:inline-block;font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.09);color:var(--muted)}
+
+    /* SVG icon chip */
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+    .chip svg{width:16px;height:16px}
+
+    /* Hair care grid */
+    .care{margin-top:18px}
+    .caregrid{display:grid;grid-template-columns:160px repeat(7,1fr);background:var(--panel);border:1px solid var(--grid);border-radius:var(--radius);overflow:auto}
+    .caregrid .cell,.caregrid .head{padding:12px;border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);min-height:58px}
+    .caregrid .label{position:sticky;left:0;background:linear-gradient(90deg,rgba(255,255,255,.03),rgba(255,255,255,0));font-weight:600;color:var(--muted)}
+    .caregrid .head{position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0));font-weight:700;text-transform:uppercase;font-size:12px}
+    .act{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);box-shadow:inset 0 1px 0 rgba(255,255,255,.04);opacity:0;translate:0 6px;animation:rise .6s var(--ease) forwards}
+    @keyframes rise{to{opacity:1;translate:0}}
+
+    /* Responsive — iPhone 12 (390x844) */
+    @media (max-width:420px){
+      .wrap{padding:18px 14px 48px}
+      header.hero{flex-direction:column;align-items:flex-start}
+      .badges{gap:6px}
+      .timeline{grid-template-columns:1fr}
+      .time{order:2}
+      .grid{grid-template-columns:1fr}
+      .block{grid-column:span 1}
+      .caregrid{grid-template-columns:130px repeat(3, 1fr)} /* split in pages via nav */
+      .scrollhint{display:block}
+    }
+    .scrollhint{display:none;color:var(--muted);font-size:12px;margin-top:6px}
+
+    /* Floating bottom pager for small screens */
+    .pager{position:sticky;bottom:10px;display:flex;gap:8px;justify-content:center;margin-top:8px}
+    .pager button{backdrop-filter:blur(6px);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(17,23,32,.6);color:var(--text);cursor:pointer}
+  </style>
 </head>
-
 <body>
-  <table>
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Monday</th>
-        <th>Tuesday</th>
-        <th>Wednesday</th>
-        <th>Thursday</th>
-        <th>Friday</th>
-        <th>Saturday</th>
-        <th>Sunday</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>5:30 AM - 6:00 AM</td>
-        <td class="get-ready">Get ready for gym</td>
-        <td class="get-ready">Get ready for gym</td>
-        <td class="get-ready">Get ready for gym</td>
-        <td class="get-ready">Get ready for gym</td>
-        <td class="get-ready">Get ready for gym</td>
-        <td class="get-ready">Get ready for gym</td>
-        <td class="rest">Rest / Light Stretching</td>
-      </tr>
-      <tr>
-        <td>6:00 AM - 7:30 AM</td>
-        <td class="gym">Gym</td>
-        <td class="gym">Gym</td>
-        <td class="gym">Gym</td>
-        <td class="gym">Gym</td>
-        <td class="gym">Gym</td>
-        <td class="gym">Gym</td>
-        <td class="rest">Rest</td>
-      </tr>
-      <tr>
-        <td>7:30 AM - 8:00 AM</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-        <td class="breakfast">Breakfast & Freshen Up</td>
-      </tr>
-      <tr>
-        <td>8:00 AM - 8:30 AM</td>
-        <td class="get-ready">Get ready for college</td>
-        <td class="get-ready">Get ready for college</td>
-        <td class="get-ready">Get ready for college</td>
-        <td class="get-ready">Get ready for college</td>
-        <td class="get-ready">Get ready for college</td>
-        <td class="personal-work">Personal Work</td>
-        <td class="personal-work">Personal Work</td>
-      </tr>
-      <tr>
-        <td>8:30 AM - 9:00 AM</td>
-        <td class="travel">Travel to college</td>
-        <td class="travel">Travel to college</td>
-        <td class="travel">Travel to college</td>
-        <td class="travel">Travel to college</td>
-        <td class="travel">Travel to college</td>
-        <td class="off">Off</td>
-        <td class="off">Off</td>
-      </tr>
-      <tr>
-        <td>9:00 AM - 5:00 PM</td>
-        <td class="college">College Classes</td>
-        <td class="college">College Classes</td>
-        <td class="college">College Classes (till 4 PM)</td>
-        <td class="free">Free till 1 PM → Web Dev / DSA</td>
-        <td class="free">Free till 1 PM → Web Dev / DSA</td>
-        <td class="off">Off</td>
-        <td class="off">Off</td>
-      </tr>
-      <tr>
-        <td>5:00 PM - 6:00 PM</td>
-        <td class="rest">Travel + Rest</td>
-        <td class="rest">Travel + Rest</td>
-        <td class="rest">Travel + Rest</td>
-        <td class="college">College Classes</td>
-        <td class="college">College Classes</td>
-        <td class="webdev">Web Development (Project)</td>
-        <td class="webdev">Web Development (New Concepts)</td>
-      </tr>
-      <tr>
-        <td>6:00 PM - 7:30 PM</td>
-        <td class="webdev">Web Development</td>
-        <td class="webdev">Web Development</td>
-        <td class="webdev">Web Development</td>
-        <td class="webdev">Web Development</td>
-        <td class="webdev">Web Development</td>
-        <td class="practice">Competitive Coding / DSA</td>
-        <td class="revision">College Subject Revision</td>
-      </tr>
-      <tr>
-        <td>7:30 PM - 8:00 PM</td>
-        <td class="rest">Rest / Entertainment</td>
-        <td class="rest">Rest / Entertainment</td>
-        <td class="rest">Rest / Entertainment</td>
-        <td class="rest">Rest / Entertainment</td>
-        <td class="rest">Rest / Entertainment</td>
-        <td class="rest">Rest / Entertainment</td>
-        <td class="rest">Rest / Entertainment</td>
-      </tr>
-      <tr>
-        <td>8:00 PM - 9:00 PM</td>
-        <td class="dinner">Dinner + Cooking</td>
-        <td class="dinner">Dinner + Cooking</td>
-        <td class="dinner">Dinner + Cooking</td>
-        <td class="dinner">Dinner + Cooking</td>
-        <td class="dinner">Dinner + Cooking</td>
-        <td class="dinner">Dinner + Cooking</td>
-        <td class="dinner">Dinner + Cooking</td>
-      </tr>
-      <tr>
-        <td>9:00 PM - 10:30 PM</td>
-        <td class="practice">DSA Practice</td>
-        <td class="practice">DSA Practice</td>
-        <td class="practice">DSA Practice</td>
-        <td class="practice">DSA Practice</td>
-        <td class="practice">DSA Practice</td>
-        <td class="webdev">Web Development (React / Backend)</td>
-        <td class="practice">Competitive Coding Practice</td>
-      </tr>
-      <tr>
-        <td>10:30 PM - 11:30 PM</td>
-        <td class="revision">Revision / Self Study</td>
-        <td class="revision">Revision / Self Study</td>
-        <td class="revision">Revision / Self Study</td>
-        <td class="revision">Revision / Self Study</td>
-        <td class="revision">Revision / Self Study</td>
-        <td class="relax">Relax / Watch Series / Gaming</td>
-        <td class="personal-work">Planning Next Week & Journaling</td>
-      </tr>
-      <tr>
-        <td>11:30 PM - 5:30 AM</td>
-        <td class="sleep">Sleep</td>
-        <td class="sleep">Sleep</td>
-        <td class="sleep">Sleep</td>
-        <td class="sleep">Sleep</td>
-        <td class="sleep">Sleep</td>
-        <td class="sleep">Sleep</td>
-        <td class="sleep">Sleep</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="wrap">
+    <header class="hero">
+      <h1>Daily Timetable + Hair Care</h1>
+      <div class="badges">
+        <span class="badge">Dark • Animated</span>
+        <span class="badge">Poppins</span>
+        <span class="badge">Responsive (iPhone 12)</span>
+      </div>
+    </header>
 
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab active" data-page="overview" role="tab">Overview</button>
+      <button class="tab" data-page="morning" role="tab">Daily Morning</button>
+      <button class="tab" data-page="mon" role="tab">Mon</button>
+      <button class="tab" data-page="tue" role="tab">Tue</button>
+      <button class="tab" data-page="wed" role="tab">Wed</button>
+      <button class="tab" data-page="thu" role="tab">Thu</button>
+      <button class="tab" data-page="fri" role="tab">Fri</button>
+      <button class="tab" data-page="sat" role="tab">Sat</button>
+      <button class="tab" data-page="sun" role="tab">Sun</button>
+      <button class="tab" data-page="care" role="tab">Hair Care</button>
+    </nav>
+
+    <div class="pages">
+      <!-- OVERVIEW -->
+      <section id="overview" class="page active card" aria-labelledby="ov-h">
+        <h2 id="ov-h">Today at a glance</h2>
+        <div class="content">
+          <div class="chip" id="todayChip">
+            <!-- calendar SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span></span>
+          </div>
+          <p class="scrollhint">Tip: swipe tabs or tap buttons to switch sections.</p>
+        </div>
+      </section>
+
+      <!-- MORNING ROUTINE (Mon/Tue/Wed/Fri/Sat/Sun) -->
+      <section id="morning" class="page card">
+        <h2>Daily Morning Blocks (Mon/Tue/Wed/Fri/Sat/Sun)</h2>
+        <div class="content timeline">
+          <div class="time">5:30–5:45</div><div class="row"><span class="label">💧 Wake, hydrate</span><span class="pill">15m</span></div>
+          <div class="time">6:00–7:45</div><div class="row"><span class="label">🏋️ Gym + running</span><span class="pill">incl. buffer</span></div>
+          <div class="time">7:45–8:15</div><div class="row"><span class="label">🌬️ Cool‑down transition</span></div>
+          <div class="time">8:15–8:45</div><div class="row"><span class="label">🧘 Yoga + mobility</span></div>
+          <div class="time">8:45–9:15</div><div class="row"><span class="label">🚿 Shower + breakfast</span></div>
+          <div class="time">9:15–9:30</div><div class="row"><span class="label">🎒 Plan/pack; commute if needed</span></div>
+        </div>
+      </section>
+
+      <!-- THURSDAY MORNING (exception) -->
+      <section id="thu-morn" class="page card">
+        <h2>Thursday Morning (Exception)</h2>
+        <div class="content timeline">
+          <div class="time">5:20–5:30</div><div class="row"><span class="label">💧 Wake, hydrate</span></div>
+          <div class="time">6:00–7:35</div><div class="row"><span class="label">🏋️ Gym (tighter)</span></div>
+          <div class="time">7:35–7:50</div><div class="row"><span class="label">🧘 Short yoga flow</span></div>
+          <div class="time">7:50–8:15</div><div class="row"><span class="label">🚿 Quick shower + breakfast</span></div>
+          <div class="time">8:15–8:45</div><div class="row"><span class="label">🚌 Commute</span></div>
+          <div class="time">9:00</div><div class="row"><span class="label">🎓 First class</span></div>
+        </div>
+      </section>
+
+      <!-- DAY PAGES -->
+      <section id="mon" class="page card">
+        <h2>Monday</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:30–9:30</span><span class="b">Morning routine</span></div>
+          <div class="block"><span class="t">9:30–10:30</span><span class="b">Web Dev deep work</span></div>
+          <div class="block"><span class="t">10:30–11:00</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">11:00–12:00</span><span class="b">Tutorial — PEA306</span></div>
+          <div class="block"><span class="t">12:00–1:00</span><span class="b">Lecture — INT252</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (college)</span></div>
+          <div class="block"><span class="t">2:00–2:45</span><span class="b">DSA practice (library)</span></div>
+          <div class="block"><span class="t">3:00–4:00</span><span class="b">Tutorial — PEV301</span></div>
+          <div class="block"><span class="t">4:00–5:00</span><span class="b">Tutorial — PEV301</span></div>
+          <div class="block"><span class="t">5:00–5:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">6:00–6:20</span><span class="b">Stretch/shower reset</span></div>
+          <div class="block"><span class="t">6:30–8:00</span><span class="b">BGMI</span><span class="tag">1h30m</span></div>
+          <div class="block"><span class="t">8:00–9:00</span><span class="b">Dinner</span></div>
+          <div class="block"><span class="t">9:00–10:15</span><span class="b">Web Dev light + review</span></div>
+          <div class="block"><span class="t">10:15–11:00</span><span class="b">Wind‑down, sleep</span></div>
+        </div>
+      </section>
+
+      <section id="tue" class="page card">
+        <h2>Tuesday</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:30–9:30</span><span class="b">Morning routine</span></div>
+          <div class="block"><span class="t">9:30–10:45</span><span class="b">Web Dev deep work</span></div>
+          <div class="block"><span class="t">10:45–11:15</span><span class="b">DSA quick set</span><span class="tag">1 med / 2 easy</span></div>
+          <div class="block"><span class="t">11:15–11:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">12:00–1:00</span><span class="b">Lecture — INT331</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (college)</span></div>
+          <div class="block"><span class="t">2:00–3:00</span><span class="b">Lecture — CSE322</span></div>
+          <div class="block"><span class="t">3:00–3:30</span><span class="b">Break + recap</span></div>
+          <div class="block"><span class="t">3:30–5:00</span><span class="b">BGMI</span><span class="tag">1h30m</span></div>
+          <div class="block"><span class="t">5:00–5:30</span><span class="b">Commute/home or walk</span></div>
+          <div class="block"><span class="t">5:30–6:30</span><span class="b">Web Dev review</span></div>
+          <div class="block"><span class="t">7:00–8:00</span><span class="b">Dinner (or 8–9)</span></div>
+          <div class="block"><span class="t">8:00–9:00</span><span class="b">DSA revision</span></div>
+          <div class="block"><span class="t">9:00–10:30</span><span class="b">Prep + unwind</span></div>
+          <div class="block"><span class="t">10:30–11:00</span><span class="b">Sleep</span></div>
+        </div>
+      </section>
+
+      <section id="wed" class="page card">
+        <h2>Wednesday</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:30–9:30</span><span class="b">Morning routine</span></div>
+          <div class="block"><span class="t">9:30–10:45</span><span class="b">Web Dev project</span></div>
+          <div class="block"><span class="t">10:45–11:15</span><span class="b">DSA drills</span></div>
+          <div class="block"><span class="t">11:15–11:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">12:00–1:00</span><span class="b">Lecture — INT331</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (college)</span></div>
+          <div class="block"><span class="t">2:00–3:00</span><span class="b">Lecture — INT222</span></div>
+          <div class="block"><span class="t">3:00–4:00</span><span class="b">Lecture — INT222</span></div>
+          <div class="block"><span class="t">4:00–5:00</span><span class="b">Lecture — PEV301</span></div>
+          <div class="block"><span class="t">5:00–5:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">6:00–7:00</span><span class="b">BGMI</span><span class="tag">1h</span></div>
+          <div class="block"><span class="t">7:00–8:00</span><span class="b">Dinner</span></div>
+          <div class="block"><span class="t">8:00–8:30</span><span class="b">BGMI</span><span class="tag">+30m</span></div>
+          <div class="block"><span class="t">8:30–10:15</span><span class="b">DSA review + flashcards</span></div>
+          <div class="block"><span class="t">10:15–11:00</span><span class="b">Wind‑down, sleep</span></div>
+        </div>
+      </section>
+
+      <section id="thu" class="page card">
+        <h2>Thursday (Exception Day)</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:20–8:45</span><span class="b">Compressed morning routine</span></div>
+          <div class="block"><span class="t">9:00–10:00</span><span class="b">Lecture — CSE322</span></div>
+          <div class="block"><span class="t">10:00–11:00</span><span class="b">Lecture — PEA306</span></div>
+          <div class="block"><span class="t">11:00–12:00</span><span class="b">Lecture — PEV301</span></div>
+          <div class="block"><span class="t">12:00–1:00</span><span class="b">Practical — INT331</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (college)</span></div>
+          <div class="block"><span class="t">2:00–3:00</span><span class="b">Lecture — CSE322</span></div>
+          <div class="block"><span class="t">3:00–4:00</span><span class="b">Practical — INT252</span></div>
+          <div class="block"><span class="t">4:00–5:00</span><span class="b">Practical — INT252</span></div>
+          <div class="block"><span class="t">5:00–5:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">6:00–7:30</span><span class="b">BGMI</span><span class="tag">1h30m</span></div>
+          <div class="block"><span class="t">7:30–8:00</span><span class="b">Shower</span></div>
+          <div class="block"><span class="t">8:00–9:00</span><span class="b">Dinner</span></div>
+          <div class="block"><span class="t">9:00–10:15</span><span class="b">Web Dev notes/refactor</span></div>
+          <div class="block"><span class="t">10:15–11:00</span><span class="b">Wind‑down, sleep</span></div>
+        </div>
+      </section>
+
+      <section id="fri" class="page card">
+        <h2>Friday</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:30–9:30</span><span class="b">Morning routine</span></div>
+          <div class="block"><span class="t">9:30–10:45</span><span class="b">DSA focus (DP/Graphs)</span></div>
+          <div class="block"><span class="t">10:45–11:15</span><span class="b">Web Dev reading/code review</span></div>
+          <div class="block"><span class="t">11:15–11:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">12:00–1:00</span><span class="b">Practical — INT331</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (college)</span></div>
+          <div class="block"><span class="t">2:00–3:00</span><span class="b">Practical — INT222</span></div>
+          <div class="block"><span class="t">3:00–4:00</span><span class="b">Practical — INT222</span></div>
+          <div class="block"><span class="t">4:00–5:00</span><span class="b">Lecture — PEA306</span></div>
+          <div class="block"><span class="t">5:00–5:45</span><span class="b">Commute</span></div>
+          <div class="block"><span class="t">6:00–7:00</span><span class="b">Recovery walk/stretch</span></div>
+          <div class="block"><span class="t">7:00–8:00</span><span class="b">Dinner</span></div>
+          <div class="block"><span class="t">8:00–9:30</span><span class="b">BGMI</span><span class="tag">1h30m</span></div>
+          <div class="block"><span class="t">9:30–10:30</span><span class="b">Weekly recap + plan</span></div>
+          <div class="block"><span class="t">10:30–11:00</span><span class="b">Sleep</span></div>
+        </div>
+      </section>
+
+      <section id="sat" class="page card">
+        <h2>Saturday</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:30–9:30</span><span class="b">Morning routine (yoga 30–40m)</span></div>
+          <div class="block"><span class="t">9:30–11:30</span><span class="b">DSA long session</span></div>
+          <div class="block"><span class="t">11:30–12:15</span><span class="b">Snack + break</span></div>
+          <div class="block"><span class="t">12:15–12:50</span><span class="b">Quick yoga reset or walk</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (home)</span></div>
+          <div class="block"><span class="t">3:00–4:30</span><span class="b">Web Dev project build</span></div>
+          <div class="block"><span class="t">6:30–8:00</span><span class="b">BGMI</span><span class="tag">1h30m</span></div>
+          <div class="block"><span class="t">8:00–9:00</span><span class="b">Dinner</span></div>
+          <div class="block"><span class="t">9:00–10:30</span><span class="b">Relax/unwind</span></div>
+        </div>
+      </section>
+
+      <section id="sun" class="page card">
+        <h2>Sunday</h2>
+        <div class="content grid">
+          <div class="block"><span class="t">5:30–9:30</span><span class="b">Morning routine (light gym / mobility)</span></div>
+          <div class="block"><span class="t">9:30–10:45</span><span class="b">Weekly review + plan</span></div>
+          <div class="block"><span class="t">11:00–12:00</span><span class="b">Light DSA (2 easy)</span></div>
+          <div class="block"><span class="t">1:00–2:00</span><span class="b">Lunch (home)</span></div>
+          <div class="block"><span class="t">4:00–5:30</span><span class="b">Web Dev polish/deploy</span></div>
+          <div class="block"><span class="t">7:00–8:00</span><span class="b">Dinner</span></div>
+          <div class="block"><span class="t">8:00–9:30</span><span class="b">BGMI</span><span class="tag">1h30m</span></div>
+          <div class="block"><span class="t">9:30–10:30</span><span class="b">Prep for Monday</span></div>
+        </div>
+      </section>
+
+      <!-- HAIR CARE PAGE -->
+      <section id="care" class="page card">
+        <h2>Weekly Hair Care — Dark Mode</h2>
+        <div class="content">
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20"/><path d="M7 7c0-3 10-3 10 0 0 3-3 5-5 5s-5 2-5 5"/></svg><span>Pre‑bath: light aloe gel daily or 5–10m light oil; heavier masks 2–3×/week.</span></div>
+
+          <div class="care card caregrid" style="margin-top:12px">
+            <div class="head label">Activities</div>
+            <div class="head">Sun</div><div class="head">Mon</div><div class="head">Tue</div><div class="head">Wed</div><div class="head">Thu</div><div class="head">Fri</div><div class="head">Sat</div>
+
+            <div class="cell label">Oiling</div>
+            <div class="cell"><span class="act" style="animation-delay:.05s">Oil massage</span></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="act" style="animation-delay:.1s">Oil massage</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="act" style="animation-delay:.15s">Oil massage</span></div>
+            <div class="cell"><span class="act" style="animation-delay:.2s">Onion juice / Aloe gel<br><small style="color:var(--muted)">Scalp treatment</small></span></div>
+
+            <div class="cell label">Shampoo</div>
+            <div class="cell"><span class="act" style="animation-delay:.1s">Shampoo</span></div>
+            <div class="cell"><span class="act" style="animation-delay:.15s">RO water rinse only</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="act" style="animation-delay:.2s">Shampoo</span></div>
+            <div class="cell"><span class="act" style="animation-delay:.25s">RO water rinse only</span></div>
+            <div class="cell"><span class="act" style="animation-delay:.3s">Shampoo</span></div>
+            <div class="cell"></div>
+
+            <div class="cell label">Conditioner</div>
+            <div class="cell"><span class="act" style="animation-delay:.15s">Conditioner</span></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="act" style="animation-delay:.25s">Conditioner</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="act" style="animation-delay:.35s">Conditioner</span></div>
+            <div class="cell"></div>
+
+            <div class="cell label">RO Rinse / Masks</div>
+            <div class="cell"><span class="act" style="animation-delay:.2s">Masks</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="act" style="animation-delay:.25s">Aloe vera gel<br><small style="color:var(--muted)">Overnight</small></span></div>
+            <div class="cell"><span class="act" style="animation-delay:.3s">Curd mask</span></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <p class="scrollhint">On small screens, scroll this grid horizontally.</p>
+          <div class="pager" aria-hidden="true"><button onclick="scrollCare(-1)">◀</button><button onclick="scrollCare(1)">▶</button></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Tab system
+    const tabs=[...document.querySelectorAll('.tab')];
+    const pages=[...document.querySelectorAll('.page')];
+    function setTab(id){
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.page===id));
+      pages.forEach(p=>p.classList.toggle('active', p.id===id));
+      // Auto show Thu morning page when Thu selected
+      if(id==='thu') document.getElementById('thu-morn').classList.remove('active');
+    }
+    tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.page)));
+
+    // Show today automatically
+    const dayMap=['sun','mon','tue','wed','thu','fri','sat'];
+    const now=new Date();
+    const todayId = dayMap[now.getDay()];
+    document.querySelector('#todayChip span').textContent = now.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'short',day:'numeric'});
+    // Default to overview; user can tap day tab. Optional: auto-open today's page
+    // setTab(todayId);
+
+    // Smooth reveal animations for blocks
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.style.transition='transform .6s var(--ease), opacity .6s var(--ease)'; e.target.style.transform='translateY(0)'; e.target.style.opacity='1'; }
+      })
+    },{threshold:.15});
+    document.querySelectorAll('.block,.row').forEach(el=>{ el.style.transform='translateY(8px)'; el.style.opacity='0'; io.observe(el); });
+
+    // Hair care pager (for small screens)
+    function scrollCare(dir){
+      const grid=document.querySelector('.caregrid');
+      grid.scrollBy({left: dir*240, behavior:'smooth'});
+    }
+    window.scrollCare=scrollCare;
+  </script>
 </body>
-
 </html>
